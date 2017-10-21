@@ -1,6 +1,14 @@
-import React from 'react';
 import PropTypes from 'prop-types';
+import React from 'react';
 import rip from 'rip-out';
+
+//
+// Allow both numbers and strings to represent a value.
+//
+const numb = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.number
+]);
 
 /**
  * Helper function to copy and paste over properties to a different object if
@@ -28,16 +36,16 @@ function copypaste(from, to, ...props) {
  */
 function prepare(props) {
   const clean = rip(props,
-        'translate', 'scale', 'rotate', 'skewX', 'skewY',
-        'fontFamily', 'fontSize', 'fontWeight', 'fontStyle'
-    );
+    'translate', 'scale', 'rotate', 'skewX', 'skewY',
+    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle'
+  );
 
   const transform = [];
   const style = {};
 
-    //
-    // Correctly apply the transformation properties.
-    //
+  //
+  // Correctly apply the transformation properties.
+  //
   if ('translate' in props) transform.push(`translate(${props.translate})`);
   if ('scale' in props) transform.push(`scale(${props.scale})`);
   if ('rotate' in props) transform.push(`rotate(${props.rotate})`);
@@ -45,12 +53,12 @@ function prepare(props) {
   if ('skewY' in props) transform.push(`skewY(${props.skewY})`);
   if (transform.length) clean.transform = transform.join(' ');
 
-    //
-    // This is the nasty part where we depend on React internals to work as
-    // intended. If we add an empty object as style, it shouldn't render a `style`
-    // attribute. So we can safely conditionally add things to our `style` object
-    // and re-introduce it to our `clean` object
-    //
+  //
+  // This is the nasty part where we depend on React internals to work as
+  // intended. If we add an empty object as style, it shouldn't render a `style`
+  // attribute. So we can safely conditionally add things to our `style` object
+  // and re-introduce it to our `clean` object
+  //
   copypaste(props, style, 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle');
   clean.style = style;
 
@@ -219,8 +227,24 @@ function Stop(props) {
  * @public
  */
 function Svg(props) {
-  return <svg { ...prepare(props) } />;
+  const { title, ...rest } = props;
+
+  if (title) {
+    return (
+      <svg role='img' aria-label='[title]' { ...prepare(rest) }>
+        <title>{ title }</title>
+        { props.children }
+      </svg>
+    );
+  }
+
+  return <svg { ...prepare(rest) } />;
 }
+
+Svg.propTypes = {
+  title: PropTypes.string,
+  desc: PropTypes.string
+};
 
 /**
  * Return a symbol SVG element.
@@ -249,12 +273,13 @@ function Text(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
   return <text { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
 }
+
 Text.propTypes = {
-  x: PropTypes.string,
-  y: PropTypes.string,
-  dx: PropTypes.string,
-  dy: PropTypes.string,
-  rotate: PropTypes.string
+  x: numb,
+  y: numb,
+  dx: numb,
+  dy: numb,
+  rotate: numb,
 };
 
 /**
@@ -273,13 +298,8 @@ function TSpan(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
   return <tspan { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
 }
-TSpan.propTypes = {
-  x: PropTypes.string,
-  y: PropTypes.string,
-  dx: PropTypes.string,
-  dy: PropTypes.string,
-  rotate: PropTypes.string
-};
+
+TSpan.propTypes = Text.propTypes;
 
 /**
  * Return a textpath SVG element.
@@ -289,7 +309,7 @@ TSpan.propTypes = {
  * @public
  */
 function TextPath(props) {
-  return <textpath { ...prepare(props) } />;
+  return <textPath { ...prepare(props) } />;
 }
 
 /**

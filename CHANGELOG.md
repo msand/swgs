@@ -1,5 +1,22 @@
 # CHANGELOG
 
+### 3.1.0
+
+- Improved accessibility by supporting titles for SVG elements. See #11
+- Correctly use `textPath` instead of `textpath` as the element names are case
+  sensitive. See #12
+
+### 3.0.1
+
+- 3.0.0 also introduced some `Prop-Type` validation to certain components. It
+  forced `x` and `y` values to be strings. This has now been updated to allow
+  both `string` and `number` values.
+
+### 3.0.0
+
+- `browser` property changed to `reactnative`.
+- Additional babel object spread plugin added.
+
 ### 2.1.1
 
 - Actually run the build during publish so we `npm publish` a version with the
