@@ -2,9 +2,12 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import rip from 'rip-out';
 
-//
-// Allow both numbers and strings to represent a value.
-//
+/**
+ * PropType specification where a value can be represented as number and string.
+ *
+ * @type {PropTypes}
+ * @private
+ */
 const numb = PropTypes.oneOfType([
   PropTypes.string,
   PropTypes.number
@@ -36,22 +39,31 @@ function copypaste(from, to, ...props) {
  */
 function prepare(props) {
   const clean = rip(props,
-    'translate', 'scale', 'rotate', 'skewX', 'skewY',
-    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle'
+    'translate', 'scale', 'rotate', 'skewX', 'skewY', 'originX', 'originY',
+    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
+    'style'
   );
 
   const transform = [];
-  const style = {};
 
   //
   // Correctly apply the transformation properties.
+  // To apply originX and originY we need to translate the element on those values and
+  // translate them back once the element is scaled, rotated and skewed.
   //
+  if ('originX' in props || 'originY' in props) transform.push(`translate(${props.originX || 0}, ${props.originY || 0})`);
   if ('translate' in props) transform.push(`translate(${props.translate})`);
   if ('scale' in props) transform.push(`scale(${props.scale})`);
   if ('rotate' in props) transform.push(`rotate(${props.rotate})`);
   if ('skewX' in props) transform.push(`skewX(${props.skewX})`);
   if ('skewY' in props) transform.push(`skewY(${props.skewY})`);
+  if ('originX' in props || 'originY' in props) transform.push(`translate(${-props.originX || 0}, ${-props.originY || 0})`);
   if (transform.length) clean.transform = transform.join(' ');
+
+  //
+  // Correctly set the initial style value.
+  //
+  const style = ('style' in props) ? props.style : {};
 
   //
   // This is the nasty part where we depend on React internals to work as
@@ -61,6 +73,16 @@ function prepare(props) {
   //
   copypaste(props, style, 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle');
   clean.style = style;
+
+  //
+  // React-Native svg provides as a default of `xMidYMid` if aspectRatio is not
+  // specified with align information. So we need to support this behavior and
+  // correctly default to `xMidYMid [mode]`.
+  //
+  const preserve = clean.preserveAspectRatio;
+  if (preserve && preserve !== 'none' && !~preserve.indexOf(' ')) {
+    clean.preserveAspectRatio = 'xMidYMid ' + preserve;
+  }
 
   return clean;
 }
@@ -117,8 +139,25 @@ function Ellipse(props) {
  * @public
  */
 function G(props) {
-  return <g { ...prepare(props) } />;
+  const { x, y, ...rest } = props;
+
+  if ((x || y) && !rest.translate) {
+    rest.translate = `${x || 0}, ${y || 0}`;
+  }
+
+  return <g { ...prepare(rest) } />;
 }
+
+/**
+ * PropType validation for the <G />.
+ *
+ * @type {Object}
+ * @private
+ */
+G.propTypes = {
+  x: numb,
+  y: numb
+};
 
 /**
  * Return a image SVG element.
@@ -241,9 +280,15 @@ function Svg(props) {
   return <svg { ...prepare(rest) } />;
 }
 
+/**
+ * PropType validation for the <Svg />.
+ *
+ * @type {Object}
+ * @private
+ */
 Svg.propTypes = {
   title: PropTypes.string,
-  desc: PropTypes.string
+  children: PropTypes.any
 };
 
 /**
@@ -271,15 +316,22 @@ function Symbol(props) {
  */
 function Text(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
+
   return <text { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
 }
 
+/**
+ * PropType validation for the <Text />.
+ *
+ * @type {Object}
+ * @private
+ */
 Text.propTypes = {
   x: numb,
   y: numb,
   dx: numb,
   dy: numb,
-  rotate: numb,
+  rotate: numb
 };
 
 /**
@@ -296,9 +348,16 @@ Text.propTypes = {
  */
 function TSpan(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
+
   return <tspan { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
 }
 
+/**
+ * PropType validation for the <TSpan />.
+ *
+ * @type {Object}
+ * @private
+ */
 TSpan.propTypes = Text.propTypes;
 
 /**
@@ -323,6 +382,28 @@ function Use(props) {
   return <use { ...prepare(props) } />;
 }
 
+/**
+ * Return a mask SVG element.
+ *
+ * @param {Object} props The properties that are spread on the SVG element.
+ * @returns {React.Component} Use SVG.
+ * @public
+ */
+function Mask(props) {
+  return <mask { ...prepare(props) } />;
+}
+
+/**
+ * Return a pattern SVG element.
+ *
+ * @param {Object} props The properties that are spread on the SVG element.
+ * @returns {React.Component} Use SVG.
+ * @public
+ */
+function Pattern(props) {
+  return <pattern { ...prepare(props) } />;
+}
+
 //
 // Expose everything in the same way as `react-native-svg` is doing.
 //
@@ -335,7 +416,9 @@ export {
   Image,
   Line,
   LinearGradient,
+  Mask,
   Path,
+  Pattern,
   Polygon,
   Polyline,
   RadialGradient,
@@ -343,8 +426,8 @@ export {
   Stop,
   Svg,
   Symbol,
-  Text,
   TSpan,
+  Text,
   TextPath,
   Use
 };

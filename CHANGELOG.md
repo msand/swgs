@@ -1,5 +1,37 @@
 # CHANGELOG
 
+### 3.3.0
+
+- Upgrade to `@babel/7`
+- Added `<Mask />` and `<Pattern />` support
+- Updated devDependencies to latest
+
+### 3.2.1
+
+- Do not prefix `preserveAspectRatio="none"` with `xMidYMid`.
+
+### 3.2.0
+
+- `preserveAspectRatio` now as the same align default of `xMidYMid` when no
+  alignment is given.
+- Moved babel-* dependencies to `devDependencies` and make the assumption
+  that these are installed by developers if they do not want to use our
+  pre-build bundle.
+- Added code coverage and Travis-CI/Coveralls integration.
+- Added missing propType validation in the `index.native.js` file as
+  well as for the `<G />` tag in the browser build.
+
+### 3.1.2
+
+- Support `originX` and `originY` as properties. See #13 #18
+
+### 3.1.1
+
+- Updated `peerDependencies` to include all React versions, not just 15.x.x.
+  See #16
+- Correctly transform/translate svg groups (`<G>`) when `x` and `y` properties
+  are added. See #15
+
 ### 3.1.0
 
 - Improved accessibility by supporting titles for SVG elements. See #11

@@ -7,17 +7,20 @@ import Svg, {
   Image,
   Line,
   LinearGradient,
+  Mask,
   Path,
+  Pattern,
   Polygon,
   Polyline,
   RadialGradient,
   Rect,
   Stop,
   Symbol,
+  TSpan,
   Text,
   TextPath,
   Use
-} from './';
+} from '../index.js';
 
 import { shallow } from 'enzyme';
 import assume from 'assume';
@@ -55,6 +58,18 @@ describe('@ux/svg', function () {
       assume(props.transform).equals('skewY(10)');
     });
 
+    it('changes originX to a transform property', function () {
+      const props = shallow(<Path originX={ 10 } />).props();
+
+      assume(props.transform).equals('translate(10, 0) translate(-10, 0)');
+    });
+
+    it('changes originY to a transform property', function () {
+      const props = shallow(<Path originY={ 10 } />).props();
+
+      assume(props.transform).equals('translate(0, 10) translate(0, -10)');
+    });
+
     it('combines multiple props in to a single transform', function () {
       const props = shallow(<Path translate={ '1, 2' } scale={ 1 } />).props();
 
@@ -74,6 +89,30 @@ describe('@ux/svg', function () {
       assume(props.style.fontWeight).equals('bold');
       assume(props.style.fontFamily).equals('arial');
       assume(props.style.fontStyle).equals('normal');
+    });
+
+    it('preserve a style object', function () {
+      const props = shallow(<Text
+        style={{
+          userSelect: 'none'
+        }}
+      />).props();
+
+      assume(props.style).is.a('object');
+      assume(props.style.userSelect).equals('none');
+    });
+
+    it('preserve a style object but give bigger priority to font values', function () {
+      const props = shallow(<Text
+        fontSize={ 12 }
+        style={{
+          userSelect: 'none'
+        }}
+      />).props();
+
+      assume(props.style).is.a('object');
+      assume(props.style.fontSize).equals(12);
+      assume(props.style.userSelect).equals('none');
     });
   });
 
@@ -134,6 +173,18 @@ describe('@ux/svg', function () {
       const name = shallow(<G />).name();
 
       assume(name).equals('g');
+    });
+
+    it('applies x/y properties as transforms', function () {
+      const props = shallow(<G x={ 1 } y= { 2 } />).props();
+
+      assume(props.transform).equals('translate(1, 2)');
+    });
+
+    it('does not apply x/y properties as transforms when translate exists', function () {
+      const props = shallow(<G x={ 1 } y= { 2 } translate='5, 6' />).props();
+
+      assume(props.transform).equals('translate(5, 6)');
     });
   });
 
@@ -255,6 +306,24 @@ describe('@ux/svg', function () {
 
       assume(name).equals('svg');
     });
+
+    it('corrects preserveAspectRatio to have a default alignment', function () {
+      const html = shallow(<Svg preserveAspectRatio="meet" />).html();
+
+      assume(html).to.include('preserveAspectRatio="xMidYMid meet"');
+    });
+
+    it('correctly supports preserveAspectRatio="none"', function () {
+      const html = shallow(<Svg preserveAspectRatio="none" />).html();
+
+      assume(html).to.include('preserveAspectRatio="none"');
+    });
+
+    it('renders with aria roles when an title is encountered', function () {
+      const html = shallow(<Svg title="accessibility title here" />).html();
+
+      assume(html).to.equal('<svg role="img" aria-label="[title]"><title>accessibility title here</title></svg>');
+    });
   });
 
   describe('Symbol', function () {
@@ -281,6 +350,18 @@ describe('@ux/svg', function () {
     });
   });
 
+  describe('TSpan', function () {
+    it('is exposed as component', function () {
+      assume(TSpan).is.not.a('undefined');
+    });
+
+    it('is a tspan', function () {
+      const name = shallow(<TSpan />).name();
+
+      assume(name).equals('tspan');
+    });
+  });
+
   describe('TextPath', function () {
     it('is exposed as component', function () {
       assume(TextPath).is.not.a('undefined');
@@ -302,6 +383,30 @@ describe('@ux/svg', function () {
       const name = shallow(<Use />).name();
 
       assume(name).equals('use');
+    });
+  });
+
+  describe('Pattern', function () {
+    it('is exposed as component', function () {
+      assume(Pattern).is.not.a('undefined');
+    });
+
+    it('is a mask', function () {
+      const name = shallow(<Pattern id="foo" />).name();
+
+      assume(name).equals('pattern');
+    });
+  });
+
+  describe('Mask', function () {
+    it('is exposed as component', function () {
+      assume(Mask).is.not.a('undefined');
+    });
+
+    it('is a mask', function () {
+      const name = shallow(<Mask id="foo" />).name();
+
+      assume(name).equals('mask');
     });
   });
 });
