@@ -1,5 +1,5 @@
+import { createElement } from 'react-native-web';
 import PropTypes from 'prop-types';
-import React from 'react';
 import rip from 'rip-out';
 
 /**
@@ -8,10 +8,7 @@ import rip from 'rip-out';
  * @type {PropTypes}
  * @private
  */
-const numb = PropTypes.oneOfType([
-  PropTypes.string,
-  PropTypes.number
-]);
+const numb = PropTypes.oneOfType([PropTypes.string, PropTypes.number]);
 
 /**
  * Helper function to copy and paste over properties to a different object if
@@ -23,7 +20,7 @@ const numb = PropTypes.oneOfType([
  * @private
  */
 function copypaste(from, to, ...props) {
-  props.forEach((prop) => {
+  props.forEach(prop => {
     if (prop in from) to[prop] = from[prop];
   });
 }
@@ -38,10 +35,20 @@ function copypaste(from, to, ...props) {
  * @private
  */
 function prepare(props) {
-  const clean = rip(props,
-    'translate', 'scale', 'rotate', 'skewX', 'skewY', 'originX', 'originY',
-    'fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
-    'style'
+  const clean = rip(
+    props,
+    'translate',
+    'scale',
+    'rotate',
+    'skewX',
+    'skewY',
+    'originX',
+    'originY',
+    'fontFamily',
+    'fontSize',
+    'fontWeight',
+    'fontStyle',
+    'style',
   );
 
   const transform = [];
@@ -51,19 +58,21 @@ function prepare(props) {
   // To apply originX and originY we need to translate the element on those values and
   // translate them back once the element is scaled, rotated and skewed.
   //
-  if ('originX' in props || 'originY' in props) transform.push(`translate(${props.originX || 0}, ${props.originY || 0})`);
+  if ('originX' in props || 'originY' in props)
+    transform.push(`translate(${props.originX || 0}, ${props.originY || 0})`);
   if ('translate' in props) transform.push(`translate(${props.translate})`);
   if ('scale' in props) transform.push(`scale(${props.scale})`);
   if ('rotate' in props) transform.push(`rotate(${props.rotate})`);
   if ('skewX' in props) transform.push(`skewX(${props.skewX})`);
   if ('skewY' in props) transform.push(`skewY(${props.skewY})`);
-  if ('originX' in props || 'originY' in props) transform.push(`translate(${-props.originX || 0}, ${-props.originY || 0})`);
+  if ('originX' in props || 'originY' in props)
+    transform.push(`translate(${-props.originX || 0}, ${-props.originY || 0})`);
   if (transform.length) clean.transform = transform.join(' ');
 
   //
   // Correctly set the initial style value.
   //
-  const style = ('style' in props) ? props.style : {};
+  const style = 'style' in props ? props.style : {};
 
   //
   // This is the nasty part where we depend on React internals to work as
@@ -95,7 +104,7 @@ function prepare(props) {
  * @public
  */
 function Circle(props) {
-  return <circle { ...prepare(props) } />;
+  return createElement('circle', prepare(props));
 }
 
 /**
@@ -106,7 +115,7 @@ function Circle(props) {
  * @public
  */
 function ClipPath(props) {
-  return <clipPath { ...prepare(props) } />;
+  return createElement('clipPath', prepare(props));
 }
 
 /**
@@ -117,7 +126,7 @@ function ClipPath(props) {
  * @public
  */
 function Defs(props) {
-  return <defs { ...prepare(props) } />;
+  return createElement('defs', prepare(props));
 }
 
 /**
@@ -128,7 +137,7 @@ function Defs(props) {
  * @public
  */
 function Ellipse(props) {
-  return <ellipse { ...prepare(props) } />;
+  return createElement('ellipse', prepare(props));
 }
 
 /**
@@ -145,7 +154,7 @@ function G(props) {
     rest.translate = `${x || 0}, ${y || 0}`;
   }
 
-  return <g { ...prepare(rest) } />;
+  return createElement('g', prepare(rest));
 }
 
 /**
@@ -167,7 +176,7 @@ G.propTypes = {
  * @public
  */
 function Image(props) {
-  return <image { ...prepare(props) } />;
+  return createElement('image', prepare(props));
 }
 
 /**
@@ -178,7 +187,7 @@ function Image(props) {
  * @public
  */
 function Line(props) {
-  return <line { ...prepare(props) } />;
+  return createElement('line', prepare(props));
 }
 
 /**
@@ -189,7 +198,7 @@ function Line(props) {
  * @public
  */
 function LinearGradient(props) {
-  return <linearGradient { ...prepare(props) } />;
+  return createElement('linearGradient', prepare(props));
 }
 
 /**
@@ -200,7 +209,7 @@ function LinearGradient(props) {
  * @public
  */
 function Path(props) {
-  return <path { ...prepare(props) } />;
+  return createElement('path', prepare(props));
 }
 
 /**
@@ -211,7 +220,7 @@ function Path(props) {
  * @public
  */
 function Polygon(props) {
-  return <polygon { ...prepare(props) } />;
+  return createElement('polygon', prepare(props));
 }
 
 /**
@@ -222,7 +231,7 @@ function Polygon(props) {
  * @public
  */
 function Polyline(props) {
-  return <polyline { ...prepare(props) } />;
+  return createElement('polyline', prepare(props));
 }
 
 /**
@@ -233,7 +242,7 @@ function Polyline(props) {
  * @public
  */
 function RadialGradient(props) {
-  return <radialGradient { ...prepare(props) } />;
+  return createElement('radialGradient', prepare(props));
 }
 
 /**
@@ -244,7 +253,7 @@ function RadialGradient(props) {
  * @public
  */
 function Rect(props) {
-  return <rect { ...prepare(props) } />;
+  return createElement('rect', prepare(props));
 }
 
 /**
@@ -255,7 +264,7 @@ function Rect(props) {
  * @public
  */
 function Stop(props) {
-  return <stop { ...prepare(props) } />;
+  return createElement('stop', prepare(props));
 }
 
 /**
@@ -269,15 +278,14 @@ function Svg(props) {
   const { title, ...rest } = props;
 
   if (title) {
-    return (
-      <svg role='img' aria-label='[title]' { ...prepare(rest) }>
-        <title>{ title }</title>
-        { props.children }
-      </svg>
+    return createElement(
+      'svg',
+      { 'role': 'img', 'aria-label': '[title]', ...prepare(rest) },
+      [createElement('title', {}, title), props.children],
     );
   }
 
-  return <svg { ...prepare(rest) } />;
+  return createElement('svg', prepare(rest));
 }
 
 /**
@@ -299,7 +307,7 @@ Svg.propTypes = {
  * @public
  */
 function Symbol(props) {
-  return <symbol { ...prepare(props) } />;
+  return createElement('symbol', prepare(props));
 }
 
 /**
@@ -317,7 +325,10 @@ function Symbol(props) {
 function Text(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
 
-  return <text { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
+  return createElement('text', {
+    ...prepare(rest),
+    ...{ x, y, dx, dy, rotate }
+  });
 }
 
 /**
@@ -349,7 +360,10 @@ Text.propTypes = {
 function TSpan(props) {
   const { x, y, dx, dy, rotate, ...rest } = props;
 
-  return <tspan { ...prepare(rest) } { ...{ x, y, dx, dy, rotate } } />;
+  return createElement('tspan', {
+    ...prepare(rest),
+    ...{ x, y, dx, dy, rotate }
+  });
 }
 
 /**
@@ -368,7 +382,7 @@ TSpan.propTypes = Text.propTypes;
  * @public
  */
 function TextPath(props) {
-  return <textPath { ...prepare(props) } />;
+  return createElement('textPath', prepare(props));
 }
 
 /**
@@ -379,7 +393,7 @@ function TextPath(props) {
  * @public
  */
 function Use(props) {
-  return <use { ...prepare(props) } />;
+  return createElement('use', prepare(props));
 }
 
 /**
@@ -390,7 +404,7 @@ function Use(props) {
  * @public
  */
 function Mask(props) {
-  return <mask { ...prepare(props) } />;
+  return createElement('mask', prepare(props));
 }
 
 /**
@@ -401,7 +415,7 @@ function Mask(props) {
  * @public
  */
 function Pattern(props) {
-  return <pattern { ...prepare(props) } />;
+  return createElement('pattern', prepare(props));
 }
 
 //
